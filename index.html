@@ -330,13 +330,62 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
     } catch (e) {}
   }
 
-  notify('👀 Wafe opened the page');
-  email('👀 Wafe opened the page');
+  // Send every event to both the phone (ntfy) and email (Formspree).
+  const startedAt = Date.now();
+  function elapsed() {
+    const s = Math.round((Date.now() - startedAt) / 1000);
+    return s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+  }
+  function track(msg) {
+    const full = msg + ' · after ' + elapsed();
+    notify(full);
+    email(full);
+  }
+
+  // 1. Page opened: which visit, phone or computer
+  let visit = 1;
+  try {
+    visit = (parseInt(localStorage.getItem('visits') || '0', 10) || 0) + 1;
+    localStorage.setItem('visits', String(visit));
+  } catch (e) {}
+  const device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'phone' : 'computer';
+  notify('👀 Wafe opened the page (visit #' + visit + ', on ' + device + ')');
+  email('👀 Wafe opened the page (visit #' + visit + ', on ' + device + ')');
+
+  // 2. Reading progress: evidence section, then the question
+  const seen = {};
+  function onceVisible(el, key, msg) {
+    if (!el || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting && !seen[key]) {
+        seen[key] = true;
+        track(msg);
+        io.disconnect();
+      }
+    }, { threshold: 0.6 });
+    io.observe(el);
+  }
+  onceVisible(document.querySelector('.evidence'), 'evidence', '📖 Reading the evidence section');
+  onceVisible(ask, 'ask', '❓ Reached the question (Yes / No)');
+
+  // 3. Still there after 1 and 3 minutes
+  [60, 180].forEach(function (sec) {
+    setTimeout(function () {
+      if (document.visibilityState === 'visible') track('⏳ Still on the page');
+    }, sec * 1000);
+  });
+
+  // 4. Left / came back / closed (capped so it can't spam)
+  let tabEvents = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (tabEvents >= 6) return;
+    tabEvents++;
+    track(document.visibilityState === 'hidden' ? '🚪 Left the page (switched app or tab)' : '🔙 Came back to the page');
+  });
 
   no.addEventListener('click', function () {
     clicks++;
-    notify('❌ Clicked No (' + clicks + '/' + maxClicks + ')' + (clicks >= maxClicks ? ', No button is gone' : ''));
-    email('❌ Clicked No (' + clicks + '/' + maxClicks + ')' + (clicks >= maxClicks ? ', the No button is gone' : ''));
+    track('❌ Clicked No (' + clicks + '/' + maxClicks + '): "' + no.textContent + '"' + (clicks >= maxClicks ? ', the No button is gone' : ''));
     if (clicks >= maxClicks) {
       no.style.transform = 'scale(0)';
       no.style.opacity = '0';
@@ -353,15 +402,13 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
   });
 
   yes.addEventListener('click', function () {
-    notify('✅ Clicked YES (after ' + clicks + ' No clicks), reading the terms…');
-    email('✅ Clicked YES (after ' + clicks + ' No clicks)');
+    track('✅ Clicked YES (after ' + clicks + ' No clicks), reading the terms…');
     terms.hidden = false;
     agree.focus();
   });
 
   agree.addEventListener('click', function () {
-    notify('🎉 Wafe agreed: no ghosting! Case closed.');
-    email('🎉 Wafe agreed: no ghosting! Case closed.');
+    track('🎉 Wafe agreed: no ghosting! Case closed.');
     terms.hidden = true;
     document.querySelector('.card > .stamp').textContent = 'Appeal approved';
     ask.innerHTML =
