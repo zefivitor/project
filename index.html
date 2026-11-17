@@ -319,16 +319,14 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
     } catch (e) {}
   }
 
-  // Email notifications via FormSubmit (free). After activating, you can swap the address for the alias FormSubmit gives you.
-  const EMAIL_TO = 'zefivitor009@gmail.com';
+  // Email notifications via Formspree (free plan: 50 submissions/month).
+  const FORMSPREE_URL = 'https://formspree.io/f/xkjrrvwb';
   function email(msg) {
     try {
       const data = new FormData();
       data.append('_subject', 'Wafe page: ' + msg);
-      data.append('_captcha', 'false');
-      data.append('_template', 'box');
       data.append('message', msg + '\nTime: ' + new Date().toLocaleString());
-      fetch('https://formsubmit.co/ajax/' + EMAIL_TO, { method: 'POST', body: data, headers: { 'Accept': 'application/json' }, keepalive: true }).catch(function () {});
+      fetch(FORMSPREE_URL, { method: 'POST', body: data, headers: { 'Accept': 'application/json' }, keepalive: true }).catch(function () {});
     } catch (e) {}
   }
 
