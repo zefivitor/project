@@ -336,7 +336,7 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
   no.addEventListener('click', function () {
     clicks++;
     notify('❌ Clicked No (' + clicks + '/' + maxClicks + ')' + (clicks >= maxClicks ? ', No button is gone' : ''));
-    if (clicks === maxClicks) email('❌ Clicked No ' + maxClicks + ' times, the No button is gone');
+    email('❌ Clicked No (' + clicks + '/' + maxClicks + ')' + (clicks >= maxClicks ? ', the No button is gone' : ''));
     if (clicks >= maxClicks) {
       no.style.transform = 'scale(0)';
       no.style.opacity = '0';
