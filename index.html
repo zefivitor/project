@@ -315,11 +315,27 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
       fetch('https://ntfy.sh/' + NTFY_TOPIC, { method: 'POST', body: msg, keepalive: true }).catch(function () {});
     } catch (e) {}
   }
+
+  // Email notifications via FormSubmit (free). After activating, you can swap the address for the alias FormSubmit gives you.
+  const EMAIL_TO = 'zefivitor009@gmail.com';
+  function email(msg) {
+    try {
+      const data = new FormData();
+      data.append('_subject', 'Wafe page: ' + msg);
+      data.append('_captcha', 'false');
+      data.append('_template', 'box');
+      data.append('message', msg + '\nTime: ' + new Date().toLocaleString());
+      fetch('https://formsubmit.co/ajax/' + EMAIL_TO, { method: 'POST', body: data, headers: { 'Accept': 'application/json' }, keepalive: true }).catch(function () {});
+    } catch (e) {}
+  }
+
   notify('👀 Wafe opened the page');
+  email('👀 Wafe opened the page');
 
   no.addEventListener('click', function () {
     clicks++;
     notify('❌ Clicked No (' + clicks + '/' + maxClicks + ')' + (clicks >= maxClicks ? ', No button is gone' : ''));
+    if (clicks === maxClicks) email('❌ Clicked No ' + maxClicks + ' times, the No button is gone');
     if (clicks >= maxClicks) {
       no.style.transform = 'scale(0)';
       no.style.opacity = '0';
@@ -337,12 +353,14 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
 
   yes.addEventListener('click', function () {
     notify('✅ Clicked YES (after ' + clicks + ' No clicks), reading the terms…');
+    email('✅ Clicked YES (after ' + clicks + ' No clicks)');
     terms.hidden = false;
     agree.focus();
   });
 
   agree.addEventListener('click', function () {
     notify('🎉 Wafe agreed: no ghosting! Case closed.');
+    email('🎉 Wafe agreed: no ghosting! Case closed.');
     terms.hidden = true;
     document.querySelector('.card > .stamp').textContent = 'Appeal approved';
     ask.innerHTML =
