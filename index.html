@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coffee or Mint Tea?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Outfit:wght@400;500;600&family=Special+Elite&display=swap">
+<style>
+/* Layout: a mock "appeal" case file on a zellige-tile ground; evidence in two columns, verdict buttons at the end, terms pop up on Yes */
+:root {
+  --bg: #eef1f8;
+  --tile: #d7def0;
+  --card: #ffffff;
+  --ink: #1d2340;
+  --muted: #5b6283;
+  --blue: #2c49b3;      /* Majorelle blue */
+  --blue-ink: #ffffff;
+  --mint: #2f8f6b;      /* mint tea */
+  --saffron: #e3a21a;
+  --stamp: #c1272d;     /* flag red */
+  --no-bg: #e9ecf5;
+  --no-ink: #4a5072;
+  --line: #dfe3ef;
+  --scrim: rgba(18, 22, 45, .55);
+  --display: "Young Serif", Georgia, serif;
+  --body: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --type: "Special Elite", "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12152a; --tile: #1c2140; --card: #1a1f3a; --ink: #eef0fb; --muted: #a6acd0;
+    --blue: #6f8cff; --blue-ink: #0d1129; --mint: #5ccaa0; --saffron: #f2bd4c; --stamp: #ff6b6b;
+    --no-bg: #262c50; --no-ink: #c4c9ea; --line: #2b3157; --scrim: rgba(0, 0, 0, .65); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12152a; --tile: #1c2140; --card: #1a1f3a; --ink: #eef0fb; --muted: #a6acd0;
+  --blue: #6f8cff; --blue-ink: #0d1129; --mint: #5ccaa0; --saffron: #f2bd4c; --stamp: #ff6b6b;
+  --no-bg: #262c50; --no-ink: #c4c9ea; --line: #2b3157; --scrim: rgba(0, 0, 0, .65); color-scheme: dark;
+}
+
+html, body { min-height: 100%; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 50% 50%, var(--tile) 0 18%, transparent 19%),
+    conic-gradient(from 45deg at 50% 50%, var(--tile) 0 25%, transparent 0 50%, var(--tile) 0 75%, transparent 0);
+  background-size: 56px 56px, 56px 56px;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+  display: grid;
+  place-items: center;
+  padding-block: 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px -30px rgba(20, 30, 80, .35);
+  padding: clamp(24px, 6vw, 44px);
+  display: grid;
+  gap: 24px;
+}
+
+.stamp {
+  font-family: var(--type);
+  color: var(--stamp);
+  border: 3px solid var(--stamp);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 15px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transform: rotate(-8deg);
+  opacity: .85;
+  display: inline-block;
+}
+.card > .stamp { position: absolute; top: 26px; right: 22px; }
+
+.flags { display: flex; align-items: center; gap: 12px; }
+.flag {
+  display: grid; justify-items: center; gap: 6px;
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600;
+}
+.flag img {
+  width: 64px; height: 48px; border-radius: 7px; display: block;
+  box-shadow: 0 6px 16px -8px rgba(20, 30, 80, .5);
+}
+.flags .vs { font-family: var(--type); font-size: 18px; color: var(--saffron); padding-bottom: 20px; }
+
+.head { display: grid; gap: 8px; }
+.caseno { font-family: var(--type); font-size: 14px; color: var(--muted); }
+h1 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(30px, 7.5vw, 42px); line-height: 1.12;
+  margin: 0; text-wrap: balance;
+}
+h1 .hl { color: var(--blue); }
+p { margin: 0; max-width: 62ch; }
+.muted { color: var(--muted); }
+
+.label {
+  font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  font-weight: 600; color: var(--mint);
+}
+
+.accused {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  font-family: var(--type);
+  font-size: 15px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+.accused dt { color: var(--muted); }
+.accused dd { margin: 0; min-width: 0; }
+
+.evidence { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .evidence { grid-template-columns: 1fr; } }
+.col { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.col h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 20px; }
+.col.bad h3 { color: var(--stamp); }
+.col.good h3 { color: var(--mint); }
+.col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.col li {
+  padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+  font-size: 15.5px; line-height: 1.45;
+}
+
+.sentence { display: grid; gap: 10px; }
+.sentence p b { font-weight: 600; }
+
+.sign { font-family: var(--display); font-size: 19px; color: var(--muted); }
+
+.ask {
+  border-top: 1px dashed var(--line);
+  padding-top: 22px;
+  display: grid; gap: 18px; justify-items: center; text-align: center;
+}
+.ask h2 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(22px, 5.5vw, 28px); line-height: 1.25;
+  margin: 0; text-wrap: balance;
+}
+.buttons {
+  min-height: 120px; display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center; gap: 14px;
+}
+button {
+  font-family: var(--body); font-weight: 600; border: 0; border-radius: 999px; cursor: pointer;
+  transition: transform .35s cubic-bezier(.3,1.6,.5,1), opacity .3s, font-size .3s, padding .3s;
+}
+button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
+.primary {
+  background: var(--blue); color: var(--blue-ink);
+  font-size: 20px; padding: 14px 36px;
+  box-shadow: 0 10px 24px -12px var(--blue);
+}
+.primary:hover { filter: brightness(1.08); }
+#no { background: var(--no-bg); color: var(--no-ink); font-size: 18px; padding: 12px 28px; }
+.hint { font-size: 14px; color: var(--muted); min-height: 1.4em; }
+
+/* Terms pop-up */
+.overlay {
+  position: fixed; inset: 0; z-index: 20;
+  background: var(--scrim);
+  display: grid; place-items: center;
+  padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-y: auto;
+}
+.modal {
+  width: 100%; max-width: 460px;
+  background: var(--card); color: var(--ink);
+  border-radius: 20px; border: 1px solid var(--line);
+  padding: clamp(22px, 5vw, 32px);
+  display: grid; gap: 16px;
+  animation: pop .45s cubic-bezier(.3,1.6,.5,1);
+}
+.modal h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.2; }
+.modal ol { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+.modal li::marker { font-family: var(--type); color: var(--stamp); }
+.modal .fine { font-size: 13px; color: var(--muted); }
+.modal .primary { justify-self: stretch; font-size: 18px; padding: 14px 20px; }
+
+.done { display: grid; gap: 14px; justify-items: center; text-align: center; animation: pop .5s cubic-bezier(.3,1.6,.5,1); }
+.done .stamp { font-size: 20px; padding: 6px 14px; }
+.done .big { font-family: var(--display); font-size: clamp(30px, 8vw, 42px); line-height: 1.1; color: var(--blue); }
+
+@keyframes pop { from { transform: scale(.7); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  button, .done, .modal { transition: none; animation: none; }
+}
+</style>
+</head>
+<body>
+
+<main class="card">
+  <span class="stamp" aria-hidden="true">Under appeal</span>
+
+  <div class="flags" aria-label="Morocco and Albania">
+    <div class="flag"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLW1hIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2MxMjcyZCIgZD0iTTY0MCAwSDB2NDgwaDY0MHoiLz4KICA8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDYyMzMiIHN0cm9rZS13aWR0aD0iMTEuNyIgZD0iTTMyMCAxNzkuNCAyODQuNCAyODlsOTMuMi02Ny42SDI2Mi40bDkzLjIgNjcuNnoiLz4KPC9zdmc+Cg==" alt="Flag of Morocco">Morocco</div>
+    <span class="vs" aria-hidden="true">×</span>
+    <div class="flag"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBpZD0iZmxhZy1pY29ucy1hbCIgdmlld0JveD0iMCAwIDY0MCA0ODAiPgogIDxwYXRoIGZpbGw9InJlZCIgZD0iTTAgMGg2NDB2NDgwSDB6Ii8+CiAgPHBhdGggaWQ9ImFsLWEiIGZpbGw9IiMwMDAwMDEiIGQ9Ik0yNzIgOTMuM2MtNC42IDAtMTIuMyAxLjUtMTIuMiA1LTEzLTIuMS0xNC4zIDMuMi0xMy41IDggMS4yLTEuOSAyLjctMyAzLjktMy4xIDEuNy0uMyAzLjUuMyA1LjQgMS40YTIxLjYgMjEuNiAwIDAgMSA0LjggNC4xYy00LjYgMS4xLTguMi40LTExLjgtLjJhMTYuNSAxNi41IDAgMCAxLTUuNy0yLjRjLTEuNS0xLTItMi00LjMtNC4zLTIuNy0yLjgtNS42LTItNC43IDIuMyAyLjEgNCA1LjYgNS44IDEwIDYuNiAyLjEuMyA1LjMgMSA4LjkgMSAzLjYgMCA3LjYtLjUgOS44IDAtMS4zLjgtMi44IDIuMy01LjggMi44LTMgLjYtNy41LTEuOC0xMC4zLTIuNC4zIDIuMyAzLjMgNC41IDkuMSA1LjcgOS42IDIgMTcuNSAzLjYgMjIuOCA2LjVhMzcuMyAzNy4zIDAgMCAxIDEwLjkgOS4yYzQuNyA1LjUgNSA5LjggNS4yIDEwLjggMSA4LjgtMi4xIDEzLjgtNy45IDE1LjQtMi44LjctOC0uNy05LjgtMi45LTItMi4yLTMuNy02LTMuMi0xMiAuNS0yLjIgMy4xLTguMy45LTkuNWEyNzMuNyAyNzMuNyAwIDAgMC0zMi4zLTE1LjFjLTIuNS0xLTQuNSAyLjQtNS4zIDMuOGE1MC4yIDUwLjIgMCAwIDEtMzYtMjMuN2MtNC4yLTcuNi0xMS4zIDAtMTAuMSA3LjMgMS45IDggOCAxMy44IDE1LjQgMTggNy41IDQuMSAxNyA4LjIgMjYuNSA4IDUuMiAxIDUuMSA3LjYtMSA4LjktMTIuMSAwLTIxLjgtLjItMzAuOS05LTYuOS02LjMtMTAuNyAxLjItOC44IDUuNCAzLjQgMTMuMSAyMi4xIDE2LjggNDEgMTIuNiA3LjQtMS4yIDMgNi42IDEgNi43LTggNS43LTIyLjEgMTEuMi0zNC42IDAtNS43LTQuNC05LjYtLjgtNy40IDUuNSA1LjUgMTYuNSAyNi43IDEzIDQxLjIgNSAzLjctMi4xIDcuMSAyLjcgMi42IDYuNC0xOC4xIDEyLjYtMjcuMSAxMi44LTM1LjMgOC0xMC4yLTQuMS0xMSA3LjItNSAxMSA2LjcgNCAyMy44IDEgMzYuNC03IDUuNC00IDUuNiAyLjMgMi4yIDQuOC0xNC45IDEyLjktMjAuOCAxNi4zLTM2LjMgMTQuMi03LjctLjYtNy42IDguOS0xLjYgMTIuNiA4LjMgNS4xIDI0LjUtMy4zIDM3LTEzLjggNS4zLTIuOCA2LjIgMS44IDMuNiA3LjNhNTMuOSA1My45IDAgMCAxLTIxLjggMThjLTcgMi43LTEzLjYgMi4zLTE4LjMuNy01LjgtMi02LjUgNC0zLjMgOS40IDEuOSAzLjMgOS44IDQuMyAxOC40IDEuMyA4LjYtMyAxNy44LTEwLjIgMjQuMS0xOC41IDUuNS00LjkgNC45IDEuNiAyLjMgNi4yLTEyLjYgMjAtMjQuMiAyNy40LTM5LjUgMjYuMi02LjctMS4yLTguMyA0LTQgOSA3LjYgNi4yIDE3IDYgMjUuNC0uMiA3LjMtNyAyMS40LTIyLjQgMjguOC0zMC42IDUuMi00LjEgNi45IDAgNS4zIDguNC0xLjQgNC44LTQuOCAxMC0xNC4zIDEzLjYtNi41IDMuNy0xLjYgOC44IDMuMiA5IDIuNyAwIDguMS0zLjIgMTIuMy03LjggNS40LTYuMiA1LjgtMTAuMyA4LjgtMTkuOSAyLjgtNC42IDcuOS0yLjQgNy45IDIuNC0yLjUgOS42LTQuNSAxMS4zLTkuNSAxNS4yLTQuNyA0LjUgMy4zIDYgNiA0LjEgNy44LTUuMiAxMC42LTEyIDEzLjItMTguMiAyLTQuNCA3LjQtMi4zIDQuOCA1LTYgMTcuNC0xNiAyNC4yLTMzLjMgMjcuOC0xLjcuMy0yLjggMS4zLTIuMiAzLjNsNyA3Yy0xMC43IDMuMi0xOS40IDUtMzAuMiA4bC0xNC44LTkuOGMtMS4zLTMuMi0yLTguMi05LjgtNC43LTUuMi0yLjQtNy43LTEuNS0xMC42IDEgNC4yIDAgNiAxLjIgNy43IDMuMSAyLjIgNS43IDcuMiA2LjMgMTIuMyA0LjcgMy4zIDIuNyA1IDQuOSA4LjQgNy43bC0xNi43LS41Yy02LTYuMy0xMC42LTYtMTQuOC0xLTMuMy41LTQuNi41LTYuOCA0LjQgMy40LTEuNCA1LjYtMS44IDcuMS0uMyA2LjMgMy43IDEwLjQgMi45IDEzLjUgMGwxNy41IDEuMWMtMi4yIDItNS4yIDMtNy41IDQuOC05LTIuNi0xMy44IDEtMTUuNCA4LjNhMTcgMTcgMCAwIDAtMS4yIDkuM2MuOC0zIDIuMy01LjUgNC45LTcgOCAyIDExLTEuMyAxMS41LTYuMSA0LTMuMiA5LjgtMy45IDEzLjctNy4xIDQuNiAxLjQgNi44IDIuMyAxMS40IDMuOCAxLjYgNSA1LjMgNi45IDExLjMgNS42IDcgLjIgNS44IDMuMiA2LjQgNS41IDItMy4zIDEuOS02LjYtMi41LTkuNi0xLjYtNC4zLTUuMi02LjMtOS44LTMuOC00LjQtMS4yLTUuNS0zLTkuOS00LjMgMTEtMy41IDE4LjgtNC4zIDI5LjgtNy44bDcuNyA2LjhjMS41LjkgMi45IDEuMSAzLjggMCA2LjktMTAgMTAtMTguNyAxNi4zLTI1LjMgMi41LTIuOCA1LjYtNi40IDktNy4zIDEuNy0uNSAzLjgtLjIgNS4yIDEuMyAxLjMgMS40IDIuNCA0LjEgMiA4LjItLjcgNS43LTIuMSA3LjYtMy43IDExLTEuNyAzLjUtMy42IDUuNi01LjcgOC4zLTQgNS4zLTkuNCA4LjQtMTIuNiAxMC41LTYuNCA0LjEtOSAyLjMtMTQgMi02LjQuNy04IDMuOC0yLjggOC4xIDQuOCAyLjYgOS4yIDIuOSAxMi44IDIuMiAzLS42IDYuNi00LjUgOS4yLTYuNiAyLjgtMy4zIDcuNi42IDQuMyA0LjUtNS45IDctMTEuNyAxMS42LTE5IDExLjUtNy43IDEtNi4yIDUuMy0xLjIgNy40IDkuMiAzLjcgMTcuNC0zLjMgMjEuNi04IDMuMi0zLjUgNS41LTMuNiA1IDEuOS0zLjMgOS45LTcuNiAxMy43LTE0LjggMTQuMi01LjgtLjYtNS45IDQtMS42IDcgOS42IDYuNiAxNi42LTQuOCAxOS45LTExLjYgMi4zLTYuMiA1LjktMy4zIDYuMyAxLjggMCA2LjktMyAxMi40LTExLjMgMTkuNCA2LjMgMTAuMSAxMy43IDIwLjQgMjAgMzAuNWwxOS4yLTIxNEwzMjAgMTM5Yy0yLTEuOC04LjgtOS44LTEwLjUtMTEtLjctLjYtMS0xLS4xLTEuNC45LS40IDMtLjggNC41LTEtNC00LjEtNy42LTUuNC0xNS4zLTcuNiAxLjktLjggMy43LS40IDkuMy0uNmEzMC4yIDMwLjIgMCAwIDAtMTMuNS0xMC4yYzQuMi0zIDUtMy4yIDkuMi02LjdhODYuMyA4Ni4zIDAgMCAxLTE5LjUtMy44IDM3LjQgMzcuNCAwIDAgMC0xMi0zLjR6bS44IDguNGMzLjggMCA2LjEgMS4zIDYuMSAyLjkgMCAxLjYtMi4zIDIuOS02LjEgMi45cy02LjItMS41LTYuMi0zYzAtMS42IDIuNC0yLjggNi4yLTIuOCIvPgogIDx1c2UgeGxpbms6aHJlZj0iI2FsLWEiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHRyYW5zZm9ybT0ibWF0cml4KC0xIDAgMCAxIDY0MCAwKSIvPgo8L3N2Zz4K" alt="Flag of Albania">Albania</div>
+  </div>
+
+  <div class="head">
+    <div class="caseno">Case No. MA–AL/001 · Wafe vs. Vitor</div>
+    <h1>Official appeal against <span class="hl">my block.</span></h1>
+  </div>
+
+  <p>Salam Wafe. I'm officially appealing my block. Hear me out, it takes 30 seconds, less than a mint tea needs to brew.</p>
+
+  <div>
+    <div class="label">The accused</div>
+    <dl class="accused">
+      <dt>Name</dt><dd>Vitor, from Albania</dd>
+      <dt>Charge</dt><dd>Being a bit of a bad guy</dd>
+      <dt>Status</dt><dd>Blocked (fair enough)</dd>
+      <dt>Plea</dt><dd>Guilty, but with good qualities</dd>
+    </dl>
+  </div>
+
+  <div class="evidence">
+    <div class="col bad">
+      <h3>Evidence against me</h3>
+      <ul>
+        <li>Yes, I can be a bad guy.</li>
+        <li>I probably talk too much.</li>
+        <li>I think byrek beats tajine. Bold, I know.</li>
+      </ul>
+    </div>
+    <div class="col good">
+      <h3>Evidence for me</h3>
+      <ul>
+        <li>Bad guy, but I also know how to do good things.</li>
+        <li>I'm never boring. That one is guaranteed.</li>
+        <li>I'm ready to learn more Darija than just "Salam".</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sentence">
+    <div class="label">Proposed sentence</div>
+    <p><b>One coffee or mint tea, together.</b> Friendly, no drama. You tell me about Morocco, I tell you about Albania, and we find out whose culture wins.</p>
+    <p class="muted">If I turn out to be boring, you can block me again. No appeal next time.</p>
+  </div>
+
+  <p class="sign">— Vitor, the defendant</p>
+
+  <section class="ask" id="ask">
+    <h2>Your verdict, Wafe: unblock the defendant?</h2>
+    <div class="buttons">
+      <button id="yes" class="primary" type="button">Yes</button>
+      <button id="no" type="button">No</button>
+    </div>
+    <p class="hint" id="hint"></p>
+  </section>
+</main>
+
+<div class="overlay" id="terms" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+    <span class="stamp" style="justify-self:start">One condition</span>
+    <h2 id="terms-title">Unblock terms &amp; conditions</h2>
+    <ol>
+      <li><b>No ghosting this time.</b> Ghosting is a serious crime in both Morocco and Albania. (Source: me.)</li>
+      <li>Replies must arrive faster than a mint tea gets cold.</li>
+      <li>Show a little interest. Even 10% counts.</li>
+      <li>The bad guy promises good behavior. Mostly.</li>
+    </ol>
+    <p class="fine">By clicking below you agree to all of the above. Breaking rule 1 will result in very dramatic Albanian sighing.</p>
+    <button id="agree" class="primary" type="button">I agree, no ghosting</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const yes = document.getElementById('yes');
+  const no = document.getElementById('no');
+  const hint = document.getElementById('hint');
+  const ask = document.getElementById('ask');
+  const terms = document.getElementById('terms');
+  const agree = document.getElementById('agree');
+
+  const noLabels = ['No', 'Objection?', 'Overruled', 'Are you sure?', 'Judge isn’t convinced', 'Last chance'];
+  const hints = [
+    '',
+    'The No button just lost some credibility.',
+    'The court notes that No is shrinking.',
+    'Yes is looking more convincing every second.',
+    'The No button is running out of evidence.',
+    'One more and the court throws it out.'
+  ];
+  let clicks = 0;
+  const maxClicks = noLabels.length;
+
+  no.addEventListener('click', function () {
+    clicks++;
+    if (clicks >= maxClicks) {
+      no.style.transform = 'scale(0)';
+      no.style.opacity = '0';
+      setTimeout(function () { no.hidden = true; }, 320);
+      hint.textContent = 'No has been dismissed. Only one option left.';
+    } else {
+      no.style.transform = 'scale(' + (1 - clicks * 0.15) + ')';
+      no.textContent = noLabels[clicks];
+      hint.textContent = hints[clicks];
+    }
+    yes.style.fontSize = (20 + clicks * 7) + 'px';
+    yes.style.padding = (14 + clicks * 4) + 'px ' + (36 + clicks * 10) + 'px';
+    yes.focus({ preventScroll: true });
+  });
+
+  yes.addEventListener('click', function () {
+    terms.hidden = false;
+    agree.focus();
+  });
+
+  agree.addEventListener('click', function () {
+    terms.hidden = true;
+    document.querySelector('.card > .stamp').textContent = 'Appeal approved';
+    ask.innerHTML =
+      '<div class="done">' +
+        '<span class="stamp">Case closed</span>' +
+        '<div class="big">Shukran, Wafe!</div>' +
+        '<p>Faleminderit! That’s "thank you" in Albanian. Your first lesson is free.</p>' +
+        '<p>Now go unblock me. I’ll be waiting, not like a sad guy, like a patient bad guy.</p>' +
+      '</div>';
+    ask.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+})();
+</script>
+</body>
+</html>
