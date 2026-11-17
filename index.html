@@ -308,8 +308,18 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
   let clicks = 0;
   const maxClicks = noLabels.length;
 
+  // Push notifications to the ntfy topic (free, no account). Failures are ignored.
+  const NTFY_TOPIC = 'vitor-wafe-82348d7b876d';
+  function notify(msg) {
+    try {
+      fetch('https://ntfy.sh/' + NTFY_TOPIC, { method: 'POST', body: msg, keepalive: true }).catch(function () {});
+    } catch (e) {}
+  }
+  notify('👀 Wafe opened the page');
+
   no.addEventListener('click', function () {
     clicks++;
+    notify('❌ Clicked No (' + clicks + '/' + maxClicks + ')' + (clicks >= maxClicks ? ', No button is gone' : ''));
     if (clicks >= maxClicks) {
       no.style.transform = 'scale(0)';
       no.style.opacity = '0';
@@ -326,11 +336,13 @@ button:focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
   });
 
   yes.addEventListener('click', function () {
+    notify('✅ Clicked YES (after ' + clicks + ' No clicks), reading the terms…');
     terms.hidden = false;
     agree.focus();
   });
 
   agree.addEventListener('click', function () {
+    notify('🎉 Wafe agreed: no ghosting! Case closed.');
     terms.hidden = true;
     document.querySelector('.card > .stamp').textContent = 'Appeal approved';
     ask.innerHTML =
